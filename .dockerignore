@@ -1,0 +1,79 @@
+# Ignore Python bytecode files
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Ignore environment and dependency directories
+venv/
+env/
+.venv/
+.env/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ignore distributions
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Ignore local configuration files
+*.env
+*.env.*
+*.local
+instance/
+.webassets-cache/
+
+# Ignore test and coverage results
+.coverage
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Ignore documentation build
+docs/_build/
+target/
+
+# Ignore Jupyter Notebook checkpoints
+**/.ipynb_checkpoints
+
+# Ignore PyInstaller
+# Usually these files are in the same directory as the source code
+*.spec
+
+# Ignore logs and temp files
+*.log
+*.tmp
+*.temp
+*.pid
+*.out
+*.err
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore docker-compose override files
+docker-compose.override.yml
+docker-compose.*.yml
+
+# Ignore Git files and directories
+.git/
+.gitignore
+
+# Ignore other unnecessary files
+.DS_Store
+Thumbs.db
+
+# Ignore backup files
+*.bak
+*.swp
+*~

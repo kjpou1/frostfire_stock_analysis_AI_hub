@@ -1,0 +1,16 @@
+services:
+  frostfire-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frostfire_stock_AI_hub
+    ports:
+      - "8078:8078"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 8078
+      MODEL_PATH: "/app/tf_models/densenet_classifier.keras"
+      OLLAMA_BASE_URL: 'http://hic-svnt-macbook.local:11434'
+      OLLAMA_MODEL: "llama3:8b-instruct-q8_0"
+    volumes:
+      - ./tf_models:/models

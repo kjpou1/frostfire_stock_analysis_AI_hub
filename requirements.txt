@@ -1,0 +1,15 @@
+langchain_openai 
+langchain_core
+python-dotenv
+streamlit
+langchain_community
+langchain-ollama
+langserve
+fastapi
+uvicorn
+sse_starlette
+pillow 
+duckduckgo-search
+tensorflow
+python-multipart
+ipykernel
