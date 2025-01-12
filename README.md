@@ -1,13 +1,3 @@
-### **GitHub Repository Description**
-```
-AI-powered stock analysis hub featuring chart detection with TensorFlow and advanced email parsing using LLMs. Includes a FastAPI backend for serving AI models, Docker support for deployment, and Raspberry Pi compatibility. Ideal for financial engineering and real-time data insights.
-```
-
----
-
-### **README.md**
-
-```markdown
 # Frostfire Stock Analysis AI Hub
 
 An AI-powered hub for advanced stock analysis, featuring:
@@ -200,6 +190,3 @@ This project is licensed under the MIT License.
 ## Contributors
 - [Kenneth Pouncey](https://github.com/kjpou1)
 
-```
-
-This README provides a clear, professional overview of your project while detailing installation, usage, and API information. Let me know if you'd like to adjust any part! 🚀
