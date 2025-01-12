@@ -41,7 +41,7 @@ This project uses **FastAPI** for a robust backend, supports Docker-based deploy
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/frostfire-stock-analysis-ai-hub.git
+git clone https://github.com/kjpou1/frostfire-stock-analysis-ai-hub.git
 cd frostfire-stock-analysis-ai-hub
 ```
 
