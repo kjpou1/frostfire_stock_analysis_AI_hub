@@ -15,9 +15,11 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from PIL import Image
 
+from app.models.api_response import APIResponse
 from app.models.image_payload import ImagePayload
 from app.models.model_load_error import ModelLoadError
 from app.utils import preprocess
+from app.utils.response import create_response
 
 logger = logging.getLogger(__name__)
 
@@ -98,21 +100,6 @@ class Host:
         # Configuration
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", 8000))
-        # self.densenet_model_path = os.getenv(
-        #     "MODEL_PATH", "tf_models/densenet_model.keras"
-        # )
-        # self.ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        # self.ollama_model = os.getenv("OLLAMA_MODEL")
-
-        # Load the DenseNet model
-        # self.chart_detect_model = self.load_model(self.densenet_model_path)
-
-        # Initialize Ollama LLM
-        # if not self.ollama_model:
-        #     raise ValueError("OLLAMA_MODEL environment variable is not set.")
-        # self.ollama_llm = ChatOllama(
-        #     base_url=self.ollama_base_url, model=self.ollama_model
-        # )
 
         # Initialize FastAPI
         self.app = FastAPI(
@@ -125,7 +112,7 @@ class Host:
         Set up FastAPI routes.
         """
 
-        @self.app.post("/detect-charts/")
+        @self.app.post("/detect-charts/", response_model=APIResponse)
         async def detect_charts(
             request: Request,
             chart_detect_model: tf.keras.Model = Depends(
@@ -148,12 +135,7 @@ class Host:
                 base64_images = payload.base64_images
             except ValueError as e:
                 self.logger.error("Invalid request payload: %s", e)
-                return {
-                    "code": 400,
-                    "code_text": "error",
-                    "message": str(e),
-                    "data": None,
-                }
+                return create_response(400, "error", str(e))
 
             results = []
 
@@ -168,9 +150,7 @@ class Host:
                     processed_image = preprocess.preprocess_image(image)
 
                     # Predict using the DenseNet model
-                    self.logger.info("Before predict for Base64 image #%d", index + 1)
                     prediction = chart_detect_model.predict(processed_image)
-                    # prediction = self.chart_detect_model.predict(processed_image)
                     is_chart = bool(prediction[0][0] <= 0.5)
 
                     # Append result
@@ -183,12 +163,7 @@ class Host:
                     results.append({"index": index, "error": str(e)})
 
             # Structured response
-            return {
-                "code": 0,
-                "code_text": "ok",
-                "message": "Processed successfully.",
-                "data": results,
-            }
+            return create_response(0, "ok", "Processed successfully.", results)
 
         @self.app.post("/analyze-email/")
         async def analyze_email(email_text: str = Form(...)):
@@ -225,6 +200,41 @@ class Host:
                 self.logger.error("Error during DuckDuckGo search: %s", e)
                 raise HTTPException(status_code=500, detail="Failed to perform search.")
 
+        @self.app.get("/health")
+        async def health_check():
+            """
+            Health check endpoint to verify that the model and LLM are loaded properly.
+            """
+            try:
+                # Check if the model is loaded
+                if (
+                    not hasattr(self.app.state, "chart_detect_model")
+                    or not self.app.state.chart_detect_model
+                ):
+                    raise ValueError("Chart detection model is not initialized.")
+
+                # Check if the LLM is loaded
+                if (
+                    not hasattr(self.app.state, "ollama_llm")
+                    or not self.app.state.ollama_llm
+                ):
+                    raise ValueError("Ollama LLM is not initialized.")
+
+                return create_response(
+                    0,
+                    "ok",
+                    "All services are running.",
+                    {"chart_detect_model": "loaded", "ollama_llm": "loaded"},
+                )
+            except Exception as e:
+                self.logger.error("Health check failed: %s", e)
+                return create_response(
+                    500,
+                    "error",
+                    str(e),
+                    {"chart_detect_model": "not loaded", "ollama_llm": "not loaded"},
+                )
+
     def run(self):
         """
         Asynchronous method to start both MQTT and FastAPI server concurrently.
@@ -233,15 +243,8 @@ class Host:
         fastapi_task = None  # Initialize fastapi_task to None
 
         try:
-            # # Start the heartbeat task
-            # heartbeat_task = asyncio.create_task(self.mqtt_service.heartbeat())
-
             # Start FastAPI server as a task
             fastapi_task = asyncio.run(self.start_fastapi())
-
-            # # Keep the process running until interrupted
-            # while True:
-            #     await asyncio.sleep(1)
 
         except asyncio.CancelledError:
             self.logger.info("Stopping host process.")
@@ -249,7 +252,6 @@ class Host:
             if fastapi_task:  # Check if fastapi_task is initialized
                 fastapi_task.cancel()
                 fastapi_task
-            # await self.mqtt_service.shutdown()
 
     async def start_fastapi(self):
         """
