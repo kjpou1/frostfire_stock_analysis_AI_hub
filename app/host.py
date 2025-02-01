@@ -15,6 +15,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from PIL import Image
 
+from app.config.config import Config
 from app.models.api_response import APIResponse
 from app.models.image_payload import ImagePayload
 from app.models.model_load_error import ModelLoadError
@@ -22,6 +23,8 @@ from app.utils import preprocess
 from app.utils.response import create_response
 
 logger = logging.getLogger(__name__)
+
+CONFIG = Config()
 
 
 def get_chart_detect_model(app: FastAPI):
@@ -35,15 +38,15 @@ def get_chart_detect_model(app: FastAPI):
 
 
 def get_ollama_llm():
-    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    model_name = os.getenv("OLLAMA_MODEL")
+    base_url = CONFIG.ollama_base_url
+    model_name = CONFIG.ollama_model
     if not model_name:
         raise ValueError("OLLAMA_MODEL environment variable is not set.")
     return ChatOllama(base_url=base_url, model=model_name)
 
 
 async def load_chart_model():
-    model_path = os.getenv("MODEL_PATH", "./tf_models/densenet_classifier.keras")
+    model_path = CONFIG.model_path
     model = None
     try:
         if not os.path.exists(model_path):
@@ -65,8 +68,8 @@ async def load_chart_model():
 
 
 async def load_ollama_llm():
-    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    model_name = os.getenv("OLLAMA_MODEL")
+    base_url = CONFIG.ollama_base_url
+    model_name = CONFIG.ollama_model
     if not model_name:
         raise ValueError("OLLAMA_MODEL environment variable is not set.")
     return ChatOllama(base_url=base_url, model=model_name)
@@ -98,8 +101,8 @@ class Host:
         self.logger = logging.getLogger(__name__)
 
         # Configuration
-        self.host = os.getenv("HOST", "0.0.0.0")
-        self.port = int(os.getenv("PORT", 8000))
+        self.host = CONFIG.host
+        self.port = CONFIG.port
 
         # Initialize FastAPI
         self.app = FastAPI(
