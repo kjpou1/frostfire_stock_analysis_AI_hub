@@ -1,5 +1,5 @@
 services:
-  frostfire-app:
+  frostfire-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,3 +14,4 @@ services:
       OLLAMA_MODEL: "llama3:8b-instruct-q8_0"
     volumes:
       - ./tf_models:/models
+    restart: unless-stopped
