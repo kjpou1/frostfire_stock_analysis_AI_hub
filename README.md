@@ -142,6 +142,42 @@ docker buildx build --platform linux/arm64 -t frostfire-ai .
     }
     ```
 
+### **4. Health Check**
+- **Endpoint**: `GET /health/`
+- **Description**: Verifies that all critical services (chart detection model and LLM) are loaded and running correctly.
+- **Response**:
+    ```json
+    {
+        "code": 0,
+        "code_text": "ok",
+        "message": "All services are running.",
+        "data": {
+            "chart_detect_model": "loaded",
+            "ollama_llm": "loaded"
+        },
+        "timestamp": "2025-02-01T10:25:55.418512",
+        "request_id": "7a71b8ed-ac7b-49f6-b52d-aa5f04afc6d0"
+    }
+    ```
+
+- **Failure Response** (if any service fails):
+    ```json
+    {
+        "code": 500,
+        "code_text": "error",
+        "message": "Chart detection model is not initialized.",
+        "data": null,
+        "timestamp": "2025-02-01T10:30:22.712845",
+        "request_id": "b2c1e3f5-4c3a-4b9b-98e5-8121f8d76024"
+    }
+    ```
+
+#### **Usage**
+- Can be used by monitoring systems (e.g., Kubernetes liveness probes, API gateways) to check service health.
+- Helps in debugging and ensures all AI models are ready before processing requests.
+
+    
+
 ---
 
 ## Development and Testing
